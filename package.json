@@ -1,10 +1,10 @@
 {
 	"name": "fcc-learn-npm-package-json",
-	"author": "Tev Ta",
 	"dependencies": {
 		"express": "^4.14.0"
 	},
 	"main": "server.js",
+	"author": "Tev Ta",
 	"scripts": {
 		"start": "node server.js"
 	},
