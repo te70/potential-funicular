@@ -20,7 +20,7 @@ app.get("/", function (req, res) {
 
 
 // timestamp API
-app.get('/api/timestamp/:dateString?', (req,res) => {
+app.get('/api/timestamp/:date?', (req,res) => {
   const dateString = req.params.dateString;
   let date;
   // if the date string is empty, it should be quivalent to the new Date() to return the current time in unix format and UTC format
