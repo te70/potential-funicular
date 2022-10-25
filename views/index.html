@@ -11,10 +11,20 @@
    <body>
     <h1>Timestamp Microservise</h1>
     <hr />
+
+    <ol class="user-stories">
+      <li>The API endpoint is <code>GET [url]/api/timestamp/:date_string?</code></li>
+      <li>A date string is valid if can be successfully parsed by <code>new Date(date_string)</code>.<br></li>
+      <li>API accepts unix time</li>
+      <li>If the date string is <strong>empty</strong> the services uses the current timestamp.</li>
+      <li>If the date string is <strong>valid</strong> the api returns a JSON having the unix structure</li>
+      <li>If the date string is <strong>Invalid</strong>the api returns a JSON having the structure</li>
+      <code>{"error" : "INvalid Date"}</code>
+    </ol>
     <div class="container">
       <h3>Example Usage:</h3>
       <ul>
-        <li><a href="api/2015-12-25">[project url]/api/2015-12-25</a></li>
+        <li><a href="/api/timestamp/:dateString?">[project url]/api/2015-12-25</a></li>
         <li><a href="api/1451001600000">[project url]/api/1451001600000</a></li>
       </ul>
 

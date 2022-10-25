@@ -19,11 +19,32 @@ app.get("/", function (req, res) {
 });
 
 
-// your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
+// timestamp API
+app.get('/api/timestamp/:dateString?', (req,res) => {
+  const dateString = req.params.dateString;
+  let date;
+  // if the date string is empty, it should be quivalent to the new Date() to return the current time in unix format and UTC format
+  // i.e the service uses the current timestamp
+  if (!dateString) {
+    date = new Date();
+  } else {
+    // if datestring is not empty
+    // if datestring is an integer, convert datestring to an integer
+    if(!isNaN(dateString)) {
+      date = new Date(parseInt(dateString));
+    } else {
+      date = new Date(dateString);
+    }
+  }
+  // if the date string is invalid the api returns an error JSON
+  // {"error": "Invalid Date"}
+  if (date.toString() === 'Invalid Date') {
+    res.json({ error: date.toString() });
+  } else {
+    // if the date string is valid the api returns a JSON in this format: {"unix": <date.getTime()>, "utc" : <date.toUTCString()>}
+    res.json({ unix: date.getTime(), utc: date.toUTCString() });
+  }
 });
-
 
 
 // listen for requests :)
