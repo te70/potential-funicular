@@ -20,7 +20,7 @@ app.get("/", function (req, res) {
 
 
 // timestamp API
-app.get("/api/timestamp/:date?", (req,res) => {
+app.get("/api/:date?", (req,res) => {
   const givenDate = req.params.date;
   let date;
   
