@@ -20,29 +20,27 @@ app.get("/", function (req, res) {
 
 
 // timestamp API
-app.get('/api/timestamp/:date?', (req,res) => {
-  const dateString = req.params.dateString;
+app.get("/api/timestamp/:date?", (req,res) => {
+  const givenDate = req.params.date;
   let date;
-  // if the date string is empty, it should be quivalent to the new Date() to return the current time in unix format and UTC format
-  // i.e the service uses the current timestamp
-  if (!dateString) {
+  
+  //check if no date provided
+  if (!givenDate) {
     date = new Date();
   } else {
-    // if datestring is not empty
-    // if datestring is an integer, convert datestring to an integer
-    if(!isNaN(dateString)) {
-      date = new Date(parseInt(dateString));
-    } else {
-      date = new Date(dateString);
-    }
+   //check if unix time
+   //number string mulitplied by 1 gives this number, date string gives Nan
+   checkUnix = givenDate * 1;
+    date = isNaN(checkUnix) ? new Date(givenDate) : new Date(checkUnix);
   }
-  // if the date string is invalid the api returns an error JSON
-  // {"error": "Invalid Date"}
-  if (date.toString() === 'Invalid Date') {
-    res.json({ error: date.toString() });
+
+ //check if valid format
+  if (date === 'Invalid Date') {
+    res.json({ error: "Invalid Date" });
   } else {
-    // if the date string is valid the api returns a JSON in this format: {"unix": <date.getTime()>, "utc" : <date.toUTCString()>}
-    res.json({ unix: date.getTime(), utc: date.toUTCString() });
+    const unix = date.getTime();
+    const utc = date.toUTCString();
+    res.json({ unix, utc});
   }
 });
 
