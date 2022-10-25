@@ -35,7 +35,7 @@ app.get("/api/:date?", (req,res) => {
   }
 
  //check if valid format
-  if (date === 'Invalid Date') {
+  if (date == "Invalid Date") {
     res.json({ error: "Invalid Date" });
   } else {
     const unix = date.getTime();
