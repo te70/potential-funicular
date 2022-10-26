@@ -5,6 +5,7 @@ const mongo = require('mongodb');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const dns = require('dns');
+const validURL = require('valid-url');
 
 const app = express();
 
@@ -17,13 +18,13 @@ mongoose.connect(process.env.MONGO_URI, {useNewUrlParser: true, useUnifiedTopolo
   )
 
 //url schema
-const shortUrlSchema = new mongoose.Schema({
-  original_url: String,
-  short_url: Number
+const urlSchema = new mongoose.Schema({
+  originalURL: String,
+  shortURL: String, 
 });
 
 //schema into model
-const ShortUrl = mongoose.model('ShortUrl', shortUrlSchema);
+const URL = mongoose.model('URL', urlSchema);
 
 app.use(cors());
 
@@ -36,92 +37,57 @@ app.get('/', function(req, res) {
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
-// Your first API endpoint
-app.get('/api/hello', function(req, res) {
-  res.json({ greeting: 'hello API' });
-});
-
-//find one by original url
-const findOneByOriginalUrl = (url, done) => {
-  ShortUrl.findOne({original_url: url}, (err, doc) =>{
-    if(err) return done(err);
-    done(null, doc);
-  });
-}
-
-//find one by short url
-const findOneByShortUrl = (shortUrl, done) => {
-  ShortUrl.findOne({short_url: shortUrl}, (err, doc) => {
-    if(err) return done(err);
-    done(null, doc);
-  });
-}
-
-//create and save url
-const createAndSaveUrl = (url, done) => {
-  ShortUrl.count((err, docsLength) => {
-    if(err) return done(err);
-    //first entity
-    if(docsLength == 0){
-      new ShortUrl({original_url: url, short_url: 0})
-      .save((err, doc) => {
-        if(err) return done(err);
-        done(null, {original_url: doc.original_url, short_url: doc.short_url});
-      });
-    }
-    else {
-      new ShortUrl({ original_url: url, short_url: docsLength})
-      .save((err, doc)=> {
-        if(err) return done(err);
-        done(null, {original_url: doc.original_url.at, short_url: doc.short_url});
-      });
-    }
-  });
-}
-
-//test valid url
-const testValidUrl = (url, done) => {
-  if(/^https?:\/\/(w{3}.)?[\w-]+.com(\/\w+)*/.test(url)){
-    dns.lookup(url.replace(/^https?:\/\//, ''), (err, address, family) => {
-      if(err) return done(err);
-      done(null, address);
+// Response for POST Request
+app.post('/api/shorturl', async (req, res)=> {
+  const { url } = req.body;
+  const shortURL = shortID.generate();
+  console.log(validURL.isUri(url));
+  if(validURL.isWebUri(url) === undefined) {
+    res.json({
+      error: 'invalid url',
     });
+  } else {
+    try {
+      let findOne = await URL.findOne({
+        originalURL: url,
+      });
+      if (findOne) {
+        res.json({
+          original_url: findOne.originalURL,
+          short_url: findOne.shortURL,
+        });
+      } else {
+        findOne = new URL({
+          originalURL: url,
+          shortURL,
+        });
+        await findOne.save();
+        res.json({
+          original_url: findOne.originalURL,
+          short_url: findOne.shortURL,
+        });
+      }
+    } catch (err) {
+      console.log(err);
+      res.status(500).json('Server error ...');
+    }
   }
-  else
-    done(null, null);
-}
-
-//api new short url
-app.post('/api/shorturl/new', (req, res) => {
-  testValidUrl(req.body.url, (err, address) => {
-    if(err) return res.json(err);
-    if(address == null)
-      return res.json({error: 'invalid URL'});
-
-      findOneByOriginalUrl(req.body.url, (err, data) => {
-        if (err) return res.json(err);
-        //if url exists already
-        if (data){
-          res.json({original_url: data.original_url, short_url: data.short_url});
-        }
-        else {
-          createAndSaveUrl(req.body.url, (err, doc) => {
-            if(err) return res.json(err);
-            res.json(doc);
-          });
-        }
-      })
-  });
 });
 
-app.get('/api/shorturl/:shortUrl', (req, res) =>{
-  findOneByShortUrl(req.params.shortUrl, (err, doc) => {
-    if (err) return res.json(err);
-    if (doc == null)
-      res.json({error: 'invalid short URL'});
-    else
-      res.redirect(doc.original.url);
-  });
+// Redirect shortened URL to Original URL
+app.get('/api/shorturl/:shortURL?', async (req, res) => {
+  try {
+    const urlParams= await URL.findOne({
+      shortURL: req.params.shortURL,
+    });
+    if (urlParams) {
+      return res.redirect(urlParams.originalURL);
+    }
+    return res.status(404).json('No URL found');
+  } catch (err){
+    console.log(err);
+    res.status(500).json('Server error ..');
+  }
 });
 
 app.listen(port, function() {
