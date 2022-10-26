@@ -25,7 +25,7 @@ app.get('/', (req, res) => {
 
 var Schema = mongoose.Schema;
 
-var exeriseUserSchema = new Schema({
+var exerciseUserSchema = new Schema({
   username: {
     type: String,
     unique: true,
@@ -49,7 +49,7 @@ app.post('/api/users', function (req, res){
     return res.json({ error: 'username is required' });
   }
 
-  let username = req.body.usernamel
+  let username = req.body.username;
   let _id = '';
 
   ExerciseUsers.findOne({ username: username }, function (err, data) {
@@ -87,13 +87,13 @@ app.post('/api/users/:_id/exercises', function (req, res) {
     return res.json({ error: '_id is required' })
   }
   if(req.body.duration === '') {
-    return res.json({ error: 'druation is required' });
+    return res.json({ error: 'duration is required' });
   }
 
   let userId = req.params._id;
   let description = req.body.description;
   let duration = parseInt(req.body.duration);
-  let date = (req.body.data !== undefined ? new Date(req.body.date) : new Date());
+  let date = (req.body.date !== undefined ? new Date(req.body.date) : new Date());
 
   if(isNaN(duration)) {
     return res.json({ error: 'duration is not a number' });
@@ -148,7 +148,7 @@ app.get('/api/users/:_id/logs', function (req, res) {
     if (req.query.from !== undefined && req.query.from !== '') {
       findConditions.date.$gte = new Date(req.query.from);
     }
-    if (findConditions.date.$gte = 'Invalid Date') {
+    if (findConditions.date.$gte == 'Invalid Date') {
       return res.json({ error: 'from date is invalid' });
     }
     if (req.query.to !== undefined && req.query.to !== ''){
