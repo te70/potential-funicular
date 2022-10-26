@@ -12,7 +12,9 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 //connect to db
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, 
+    () => console.log('Connected to DB')
+  )
 
 //url schema
 const shortUrlSchema = new mongoose.Schema({
